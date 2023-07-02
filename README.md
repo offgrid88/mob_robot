@@ -1,95 +1,11 @@
-| Supported Targets | ESP32 | ESP32-C6 | ESP32-H2 | ESP32-S3 |
-| ----------------- | ----- | -------- | -------- | -------- |
-# MCPWM Brushed DC Motor Example
+# Mob_robot
+Mob is a versatile and adaptable robot, capable of handling various tasks and experiments. Its sleek and compact design makes it easy to work with, allowing me to focus on developing cutting-edge technologies without any unnecessary distractions.
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+Equipped with state-of-the-art hardware interfaces, Mob effortlessly interfaces with different sensors, actuators, and components, enabling me to explore and experiment with different robotic capabilities. From camera modules to motor controllers, Mob's modular design allows for seamless integration and rapid prototyping.
 
-This example mainly illustrates how to drive a brushed DC motor by generating two specific PWM signals. However the PWM signals from ESP chip can't drive motors directly as the motor usually consumes high current. So an H-bridge like [DRV8848](https://www.ti.com/product/DRV8848) should be used to provide the needed voltage and current for brushed DC motor. To simplify the DC motor control of MCPWM peripheral driver, there's a component called [bdc_motor](https://components.espressif.com/component/espressif/bdc_motor) which abstracts the common operations into a generic interface. The most useful operations are: `forward`, `reverse`, `coast` and `brake`.
+With Mob as my reliable companion, I can dive deep into the world of robotics, developing innovative solutions and pushing the boundaries of what is possible. Its robustness and reliability make it an ideal platform for testing and refining my ideas, ensuring that the kernel modules and drivers I develop are efficient and perform optimally.
 
-To measure the speed of motor, a photoelectric encoder is used to generate the "speed feedback" signals (e.g. a pair of quadrature signal). In the example, we use the PCNT peripheral to decode that quadrature signals. For more information, please refer to [rotary encoder example](../../pcnt/rotary_encoder/README.md) as well.
+Whether I'm working on computer vision algorithms, motion planning, or sensor fusion, Mob provides me with the necessary tools and flexibility to bring my ideas to life. Its capabilities as a development platform pave the way for groundbreaking advancements in the field of robotics.
 
-The example uses a simple PID algorithm to keep the motor spin in a stable speed. Like the [bdc_motor](https://components.espressif.com/component/espressif/bdc_motor), the [PID component](https://components.espressif.com/component/espressif/pid_ctrl) is also managed by the component manager. These components' dependencies are listed in the [manifest file](main/idf_component.yml).
+In conclusion, Mob is not just a basic robot but an essential part of my journey as a roboticist. It empowers me to explore, innovate, and create, pushing the boundaries of what robots can do. With Mob by my side, I am confident in my ability to develop groundbreaking technologies that will shape the future of robotics.
 
-## How to Use Example
-
-Before project configuration and build, be sure to set the correct chip target using `idf.py set-target <chip_name>`.
-
-### Hardware Required
-
-* A development board with any Espressif SoC which features MCPWM and PCNT peripheral (e.g., ESP32-DevKitC, ESP32-S3-Motor-Devkit, etc.)
-* A USB cable for Power supply and programming
-* A separate 12V power supply for brushed DC motor and H-bridge (the voltage depends on the motor model used in the example)
-* A motor driving board to transfer pwm signal into driving signal
-* A brushed DC motor, e.g. [25GA370](http://www.tronsunmotor.com/data/upload/file/201807/e03b98802b5c5390d6570939def525ba.pdf)
-* A quadrature encoder to detect speed
-
-Connection :
-```
-                                     Power(12V)
-                                         |
-      ESP                                v
-+-------------------+             +--------------------+
-|                   |             |      H-Bridge      |
-|               GND +<----------->| GND                |      +--------------+
-|                   |             |                    |      |              |
-|  BDC_MCPWM_GPIO_A +----PWM0A--->| IN_A         OUT_A +----->|   Brushed    |
-|                   |             |                    |      |     DC       |
-|  BDC_MCPWM_GPIO_B +----PWM0B--->| IN_B         OUT_B +----->|    Motor     |
-|                   |             |                    |      |              |
-|                   |             +--------------------+      |              |
-|                   |                                         +------+-------+
-|                   |                                                |
-|                   |             +--------------------+             |
-|            VCC3.3 +------------>| VCC    Encoder     |             |
-|                   |             |                    |             |
-|               GND +<----------->|                    |<------------+
-|                   |             |                    |
-|BDC_ENCODER_GPIO_A |<---PhaseA---+ C1                 |
-|                   |             |                    |
-|BDC_ENCODER_GPIO_B |<---PhaseB---+ C2                 |
-|                   |             |                    |
-+-------------------+             +--------------------+
-```
-
-### Build and Flash
-
-Run `idf.py -p PORT flash monitor` to build, flash and monitor the project.
-
-(To exit the serial monitor, type ``Ctrl-]``.)
-
-See the [Getting Started Guide](https://idf.espressif.com/) for full steps to configure and use ESP-IDF to build projects.
-
-
-## Example Output
-
-Run the example, you will see the following output log:
-
-```
-I (0) cpu_start: Starting scheduler on APP CPU.
-I (308) example: Create DC motor
-I (308) gpio: GPIO[7]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0
-I (318) gpio: GPIO[15]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0
-I (328) example: Init pcnt driver to decode rotary signal
-I (328) gpio: GPIO[36]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0
-I (338) gpio: GPIO[35]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0
-I (348) gpio: GPIO[35]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0
-I (358) gpio: GPIO[36]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0
-I (368) example: Create PID control block
-I (378) example: Create a timer to do PID calculation periodically
-I (378) example: Enable motor
-I (388) example: Forward motor
-I (388) example: Start motor speed loop
-```
-
-### View velocity curve in [Serial Studio](https://github.com/Serial-Studio/Serial-Studio)
-
-To help tune the PID parameters (i.e. `Kp`, `Ki` and `Kd` in the example), this example supports to log a short string frame of runtime motor speed. The string frame can be parsed by [Serial Studio](https://github.com/Serial-Studio/Serial-Studio). This example also provides the [communication description file](serial-studio-dashboard.json) out of the box, which can be loaded by Serial Studio and then plot the curves as follows:
-
-![bdc_speed_dashboard](bdc_speed_dashboard.png)
-
-## Troubleshooting
-
-* Make sure your ESP board and H-bridge module have been connected to the same GND panel.
-* The PID parameter set in ths example might not work well in all kinds of motors, because it's not adaptive. You need to fine tune the parameters again by yourself.
-
-For any technical queries, please open an [issue](https://github.com/espressif/esp-idf/issues) on GitHub. We will get back to you soon.
